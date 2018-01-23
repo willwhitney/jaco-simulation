@@ -13,7 +13,7 @@
 # limitations under the License.
 # ============================================================================
 
-"""Cartpole domain."""
+"""Jaco arm domain."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -49,13 +49,13 @@ def get_model_and_assets(num_poles=1):
 @SUITE.add('benchmarking', 'easy')
 def basic(time_limit=_DEFAULT_TIME_LIMIT, random=None):
   """Returns the Cartpole Balance task."""
-  physics = mujoco.Physics.from_xml_string(*get_model_and_assets(num_poles=3))
-  task = JacoBalance(swing_up=True, sparse=False, random=random)
+  physics = Physics.from_xml_string(*get_model_and_assets(num_poles=3))
+  task = JacoReacher(random=random)
   return control.Environment(physics, task, time_limit=time_limit)
 
 
 def _make_model():
-  xml_string = common.read_model('/Users/willw/code/dm-control-experiments/jaco.xml')
+  xml_string = common.read_model('/Users/willw/code/jaco-simulation/jaco_other.xml')
   # return xml_string
   mjcf = etree.fromstring(xml_string)
 # xml_string = _make_model()
@@ -83,36 +83,43 @@ def _make_model():
   return etree.tostring(mjcf, pretty_print=True)
 
 
-# class Physics(mujoco.Physics):
-#   """Physics simulation with additional features for the Cartpole domain."""
-#
-#   def cart_position(self):
-#     """Returns the position of the cart."""
-#     return self.named.data.qpos['slider'][0]
-#
-#   def angular_vel(self):
-#     """Returns the angular velocity of the pole."""
-#     return self.data.qvel[1:]
-#
-#   def pole_angle_cosine(self):
-#     """Returns the cosine of the pole angle."""
-#     return self.named.data.xmat[2:, 'zz']
-#
-#   def bounded_position(self):
-#     """Returns the state, with pole angle split into sin/cos."""
-#     return np.hstack((self.cart_position(),
-#                       self.named.data.xmat[2:, ['zz', 'xz']].ravel()))
+class Physics(mujoco.Physics):
+  """Physics simulation with additional features for the Acrobot domain."""
+
+  # def horizontal(self):
+  #   """Returns horizontal (x) component of body frame z-axes."""
+  #   return self.named.data.xmat[['upper_arm', 'lower_arm'], 'xz']
+  #
+  # def vertical(self):
+  #   """Returns vertical (z) component of body frame z-axes."""
+  #   return self.named.data.xmat[['upper_arm', 'lower_arm'], 'zz']
+
+  def finger_to_target_distance(self):
+    """Returns the distance from the tip to the target."""
+    # ipdb.set_trace()
+    tip_to_target = (self.named.data.geom_xpos['target'] -
+                     self.named.data.geom_xpos['jaco_link_fingertip_1'])
+    return np.linalg.norm(tip_to_target)
+
+  def finger_to_target(self):
+    """Returns the distance from the tip to the target."""
+    # ipdb.set_trace()
+    tip_to_target = (self.named.data.geom_xpos['target'] -
+                     self.named.data.geom_xpos['jaco_link_fingertip_1'])
+    return tip_to_target
+
+  # def orientations(self):
+  #   """Returns the sines and cosines of the pole angles."""
+  #   return np.concatenate((self.horizontal(), self.vertical()))
 
 
-class JacoBalance(base.Task):
+class JacoReacher(base.Task):
   """A Cartpole `Task` to balance the pole.
   State is initialized either close to the target configuration or at a random
   configuration.
   """
-  _CART_RANGE = (-.25, .25)
-  _ANGLE_COSINE_RANGE = (.995, 1)
 
-  def __init__(self, swing_up, sparse, random=None):
+  def __init__(self, random=None):
     """Initializes an instance of `Balance`.
     Args:
       swing_up: A `bool`, which if `True` sets the cart to the middle of the
@@ -124,9 +131,7 @@ class JacoBalance(base.Task):
         integer seed for creating a new `RandomState`, or None to select a seed
         automatically (default).
     """
-    self._sparse = sparse
-    self._swing_up = swing_up
-    super(JacoBalance, self).__init__(random=random)
+    super(JacoReacher, self).__init__(random=random)
 
   def initialize_episode(self, physics):
     """Sets the state of the environment at the start of each episode.
@@ -148,13 +153,16 @@ class JacoBalance(base.Task):
   def get_observation(self, physics):
     """Returns an observation of the (bounded) physics state."""
     obs = collections.OrderedDict()
-    # obs['position'] = physics.bounded_position()
-    # obs['velocity'] = physics.velocity()
+    obs['position'] = physics.position()
+    obs['to_target'] = physics.finger_to_target()
+    obs['velocity'] = physics.velocity()
     return obs
 
-  def _get_reward(self, physics, sparse):
-    return 1
+
 
   def get_reward(self, physics):
     """Returns a sparse or a smooth reward, as specified in the constructor."""
-    return 1
+
+    # radii = physics.named.model.geom_size[['target', 'jaco_link_fingertip_1'], 0].sum()
+    # return rewards.tolerance(physics.finger_to_target_distance(), (0, radii))
+    return -physics.finger_to_target_distance()
