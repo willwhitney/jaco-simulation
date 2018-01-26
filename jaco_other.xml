@@ -50,15 +50,34 @@
 			<geom material="MatViz" type="mesh" group="0"  contype="1" conaffinity="0"/>
 			<joint pos="0 0 0" type="hinge"/>
 		</default>
-		<default class ="ground">
+		<default class="ground">
 			<geom type="plane" rgba="0.7 0.7 0.7 1" contype="0" conaffinity="1"/>
 		</default>
    </default>
 
+	<!-- constrain the hand and the endpoint to be in the same relative locations -->
+   <equality>
+	   <weld name="weld" body1="endpoint" body2="jaco_link_hand" solimp="0.02 0.1 0.05" solref="0.06 1" />
+   </equality>
     <worldbody>
+		<!-- body that will control the hand position -->
+		<!-- mocap makes it immoveable -->
+		<body name="endpoint" pos="0 0.5 0.5" mocap="true">
+            <geom conaffinity="0" contype="0" name="endpoint" rgba="0.2 0.9 0.2 1" size=".02" type="sphere"/>
+        </body>
+
+		<!-- Target -->
+		<!-- <body name="target" pos="0 0 0">
+			<joint armature="0" axis="1 0 0" damping="0" limited="true" name="target_x" pos="0 0 0" range="-.6 .6" ref="0" stiffness="0" type="slide"/>
+			<joint armature="0" axis="0 1 0" damping="0" limited="true" name="target_y" pos="0 0 0" range="-.6 .6" ref="0" stiffness="0" type="slide"/>
+			<joint armature="0" axis="0 0 1" damping="0" limited="true" name="target_z" pos="0 0 0" range="-1.5 1.5" ref="0" stiffness="1" type="slide"/>
+			<geom conaffinity="0" contype="0" name="target" pos="0 0 0.02" rgba="0.9 0.2 0.2 1" size=".06" type="sphere"/>
+		</body> -->
+		<geom name="target" pos="0 0 .01" type="sphere" rgba="0.9 0.2 0.2 1" size=".06"/>
 
 		<camera name="view1" pos="0 0 2.0" zaxis="0 0 1" fovy="45" ipd="0.068"/>
-	    <camera name="view2" pos="1.0 0.7 0.3" xyaxes="-1 1 0 0 0 1" fovy="45" ipd="0.068"/>
+	    <camera name="view2" pos="2.0 1.4 0.3" xyaxes="-0.8 1 0 0 0 1" fovy="45" ipd="0.068"/>
+	    <camera name="topdown" pos="0 0 2" xyaxes="1 0 0 0 1 0" fovy="45" ipd="0.068"/>
 
 
 		<light castshadow="false" directional="true" cutoff="60" exponent="1" diffuse="1 1 1" specular=".1 .1 .1" pos="1 1 1.5" dir="-1 -1 -1.3"/>
@@ -103,13 +122,14 @@
 								<body name="jaco_link_hand" pos="0.0343 0 -0.06588" quat="0.627211 -0.326506 -0.326506 0.627211">
                                     <inertial pos="0.0036132 -6.2241e-005 -0.0583749" quat="0.669114 -0.237618 -0.23799 0.66271" mass="0.58074" diaginertia="0.000817146 0.000671192 0.000606807" />
                                     <joint name="jaco_joint_6" axis="0 0 -1" />
-                                    <geom contype="1" conaffinity="1" mesh="jaco_link_hand" rgba=".13 .13 .13 1"/>
+                                    <geom name="jaco_hand" contype="1" conaffinity="1" mesh="jaco_link_hand" rgba=".13 .13 .13 1"/>
 
 
                                     <body name="jaco_link_finger_1" pos="-0.03978 0 -0.10071" quat="-0.414818 -0.329751 -0.663854 0.52772">
                                         <inertial pos="0.0485761 -0.000715511 2.09499e-008" quat="0.507589 0.507348 0.492543 0.492294" mass="0.0379077" diaginertia="4.00709e-005 4.00528e-005 2.156e-006" />
                                         <joint name="jaco_joint_finger_1" limited="true" axis="0 0 1" range="0 0.698132"/>
                                         <geom name="jaco_link_fingertip_1" mesh="jaco_link_finger_1"/>
+										<site name="finger" pos="0 0 0" type="sphere" size="0.01"/>
                                     </body>
                                     <body name="jaco_link_finger_2" pos="0.03569 -0.0216 -0.10071" quat="0.625248 -0.567602 0.434845 0.312735">
                                         <inertial pos="0.0485761 -0.000715511 2.09499e-008" quat="0.507589 0.507348 0.492543 0.492294" mass="0.0379077" diaginertia="4.00709e-005 4.00528e-005 2.156e-006" />
@@ -128,13 +148,11 @@
                 </body>
             </body>
         </body>
-		<!-- Target -->
-        <body name="target" pos="0 0 .01">
-            <joint armature="0" axis="1 0 0" damping="0" limited="true" name="target_x" pos="0 0 0" range="-.6 .6" ref="0" stiffness="0" type="slide"/>
-            <joint armature="0" axis="0 1 0" damping="0" limited="true" name="target_y" pos="0 0 0" range="-.6 .6" ref="0" stiffness="0" type="slide"/>
-            <geom conaffinity="0" contype="0" name="target" pos="0 0 0.02" rgba="0.9 0.2 0.2 1" size=".06" type="sphere"/>
-        </body>
+
+
     </worldbody>
+
+
 
 	<actuator>
 		<!--  ================= Torque actuators (Weren't present in the URDF. Added seperately)================= /-->
