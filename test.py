@@ -35,7 +35,7 @@ def move_target_to_hand():
   env.physics.named.model.geom_pos['target'] = env.physics.named.data.xpos['jaco_link_hand']
 
 def move_mocap_to_hand():
-  env.physics.named.data.mocap_pos['weld'] = env.physics.named.data.xpos['jaco_link_hand']
+  env.physics.named.data.mocap_pos['endpoint'] = env.physics.named.data.xpos['jaco_link_hand']
 
 def zero_mocap_offset():
   env.physics.named.model.eq_data['weld'].fill(0)
