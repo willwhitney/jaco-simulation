@@ -20,6 +20,7 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import os
 
 # Internal dependencies.
 
@@ -40,7 +41,7 @@ _DEFAULT_TIME_LIMIT = 10
 SUITE = containers.TaggedTasks()
 
 
-def get_model_and_assets(num_poles=1):
+def get_model_and_assets():
   """Returns a tuple containing the model XML string and a dict of assets."""
   return _make_model(), common.ASSETS
 
@@ -49,13 +50,15 @@ def get_model_and_assets(num_poles=1):
 @SUITE.add('benchmarking', 'easy')
 def basic(time_limit=_DEFAULT_TIME_LIMIT, random=None):
   """Returns the Cartpole Balance task."""
-  physics = Physics.from_xml_string(*get_model_and_assets(num_poles=3))
+  # ipdb.set_trace()
+  physics = Physics.from_xml_string(*get_model_and_assets())
   task = JacoReacher(random=random)
   return control.Environment(physics, task, time_limit=time_limit)
 
 
 def _make_model():
-  xml_string = common.read_model('/Users/willw/code/jaco-simulation/jaco_other.xml')
+    # os.path.dirname(os.path.realpath(__file__))
+  xml_string = common.read_model('/home/will/code/jaco-simulation/jaco_other.xml')
   # return xml_string
   mjcf = etree.fromstring(xml_string)
 # xml_string = _make_model()
@@ -107,6 +110,9 @@ class Physics(mujoco.Physics):
     tip_to_target = (self.named.data.geom_xpos['target'] -
                      self.named.data.geom_xpos['jaco_link_fingertip_1'])
     return tip_to_target
+
+  def move_hand(self, position):
+    self.named.data.mocap_pos[0] = position
 
   # def orientations(self):
   #   """Returns the sines and cosines of the pole angles."""

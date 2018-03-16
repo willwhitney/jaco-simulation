@@ -6,23 +6,25 @@ import pyglet
 
 import inspect
 # Load one task:
+import cv2
 
 
+# env = suite.load('cartpole', 'swingup')
 LOCAL_DOMAINS = {name: module for name, module in locals().items()
             if inspect.ismodule(module) and hasattr(module, 'SUITE')}
 suite._DOMAINS = {**suite._DOMAINS, **LOCAL_DOMAINS}
 env = suite.load(domain_name="jaco", task_name="basic")
 # env = jaco.basic()
-
+#
 # Iterate over a task set:
 # for domain_name, task_name in suite.BENCHMARKING:
 #   env = suite.load(domain_name, task_name)
 
 width = 640
 height = 480
-
 fullwidth = width * 2
-window = pyglet.window.Window(width=fullwidth, height=height, display=None)
+
+# window = pyglet.window.Window(width=fullwidth, height=height)
 
 # Step through an episode and print out reward, discount and observation.
 action_spec = env.action_spec()
@@ -42,6 +44,9 @@ def zero_mocap_offset():
 
 zero_mocap_offset()
 
+cv2.namedWindow('arm', cv2.WINDOW_NORMAL)
+cv2.resizeWindow('arm', fullwidth, height)
+
 # env.physics.named.data.mocap_pos[0] = env.physics.named.data.xpos['jaco_link_hand']
 while not time_step.last():
   # action = np.random.uniform(-1, 1, size=[6])
@@ -55,9 +60,15 @@ while not time_step.last():
     pixel1 = env.physics.render(height, width, camera_id=1)
     pixel2 = env.physics.render(height, width, camera_id=2)
     pixel = np.concatenate([pixel1, pixel2], 1)
-    window.clear()
-    window.switch_to()
-    window.dispatch_events()
-    pyglet.image.ImageData(fullwidth, height, 'RGB', pixel.tobytes(), pitch=fullwidth * -3).blit(0, 0)
-    window.flip()
+    cv2.imshow('arm', pixel)
+    cv2.waitKey(10)
+    # if i > 0:
+    # window.switch_to()
+    # window.clear()
+    # if i == 0:
+    # window.dispatch_events()
+    # pyglet.image.ImageData(fullwidth, height, 'RGB', pixel.tobytes(), pitch=fullwidth * -3).blit(0, 0)
+    # window.flip()
   import ipdb; ipdb.set_trace()
+  # env.physics.move_hand([1,0.5,0.5])
+cv2.destroyAllWindows()
