@@ -21,6 +21,7 @@ from __future__ import print_function
 
 import collections
 import os
+import os.path
 
 # Internal dependencies.
 
@@ -58,7 +59,11 @@ def basic(time_limit=_DEFAULT_TIME_LIMIT, random=None):
 
 def _make_model():
     # os.path.dirname(os.path.realpath(__file__))
-  xml_string = common.read_model('/home/will/code/jaco-simulation/jaco_other.xml')
+  # print(os.path.realpath(__file__))
+  # print(os.path.join(os.path.dirname( __file__ ), 'jaco_other.xml'))
+  model_path = os.path.join(os.path.dirname( __file__ ), 'jaco_other.xml')
+  xml_string = common.read_model(model_path)
+  # xml_string = common.read_model('/home/will/code/jaco-simulation/jaco_other.xml')
   # return xml_string
   mjcf = etree.fromstring(xml_string)
 # xml_string = _make_model()

@@ -16,7 +16,7 @@
 ====================================================== -->
 
 <mujoco model="jaco(v1.31)">
-    <compiler angle="radian" meshdir="/home/will/code/jaco-simulation/meshes_other/" />
+    <compiler angle="radian" meshdir="meshes_other/" />
 
 	<!-- <option integrator="RK4" solver="PGS" timestep="0.001" gravity="0 0 0" iterations="50"/> -->
 

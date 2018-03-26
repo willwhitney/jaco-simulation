@@ -30,19 +30,19 @@ fullwidth = width * 2
 action_spec = env.action_spec()
 time_step = env.reset()
 
-action = np.zeros([6])
+action = np.zeros([9])
 time_step = env.step(action)
 
-def move_target_to_hand():
-  env.physics.named.model.geom_pos['target'] = env.physics.named.data.xpos['jaco_link_hand']
-
-def move_mocap_to_hand():
-  env.physics.named.data.mocap_pos['endpoint'] = env.physics.named.data.xpos['jaco_link_hand']
-
-def zero_mocap_offset():
-  env.physics.named.model.eq_data['weld'].fill(0)
-
-zero_mocap_offset()
+# def move_target_to_hand():
+#   env.physics.named.model.geom_pos['target'] = env.physics.named.data.xpos['jaco_link_hand']
+#
+# def move_mocap_to_hand():
+#   env.physics.named.data.mocap_pos['endpoint'] = env.physics.named.data.xpos['jaco_link_hand']
+#
+# def zero_mocap_offset():
+#   env.physics.named.model.eq_data['weld'].fill(0)
+#
+# zero_mocap_offset()
 
 cv2.namedWindow('arm', cv2.WINDOW_NORMAL)
 cv2.resizeWindow('arm', fullwidth, height)
